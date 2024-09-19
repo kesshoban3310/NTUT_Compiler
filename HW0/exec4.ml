@@ -7,10 +7,10 @@ let split lst =
   let mid = (List.length lst)/2 in
     let rec aux i acc lst =
       match lst with
-      | [] -> (List.rev acc, [])  (* 當列表為空時反轉 acc *)
+      | [] -> (List.rev acc, [])  
       | hd :: tl ->
           if i = mid then (List.rev acc, lst)
-          else aux (i + 1) (hd :: acc) tl  (* 將 hd 加入 acc *)
+          else aux (i + 1) (hd :: acc) tl  
     in
     aux 0 [] lst
 
@@ -25,7 +25,7 @@ let rec merge lst rst =
       h2 :: (merge lst t2)
 
 let rec sort lst = 
-  if List.length lst <= 1 then lst  (* 基本情況 *)
+  if List.length lst <= 1 then lst  
   else
     let (lt,rt) = split lst in
     let res = merge (sort lt) (sort rt) in
