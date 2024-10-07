@@ -6,6 +6,7 @@ isqrt:
     movq %rdi,%r8
     movq $0,%r9
     movq $1,%r10
+<<<<<<< HEAD
     jmp isqrt_expr
     
 isqrt_expr:
@@ -32,6 +33,33 @@ loop_expr:
     ret
 
 loop:
+=======
+    jmp isqrt_loop
+    
+isqrt_loop:
+    cmpq %r8,%r10
+    jg isqrt_end
+
+    incq %r9
+    movq %r9,%r11
+    shlq $1,%r11
+    addq $1,%r11
+    addq %r11,%r10
+
+    jmp isqrt_loop
+isqrt_end:
+    movq %r9,%rax
+    ret
+
+main:
+    pushq %rbp
+    movq %rsp,%rbp
+    jmp loop
+loop:
+    cmp $20,(n)
+    jg end_loop
+
+>>>>>>> 1666d7a61b34bc777d5d4ec5462e25848f3e6a23
     movq (n),%rdi
     call isqrt
 
@@ -42,11 +70,24 @@ loop:
 
     xorq %rax,%rax
     incq (n)
+<<<<<<< HEAD
     jmp loop_expr
+=======
+    jmp loop
+end_loop:
+    xorq %rax,%rax
+    popq %rbp
+    ret
+>>>>>>> 1666d7a61b34bc777d5d4ec5462e25848f3e6a23
 
     .data
 massage:
     .string "sqrt(%2d) = %2d\n"
+<<<<<<< HEAD
+=======
+debug_message:
+    .string "%2d\n"
+>>>>>>> 1666d7a61b34bc777d5d4ec5462e25848f3e6a23
 n:
     .quad 0
 
