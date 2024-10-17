@@ -330,9 +330,10 @@ class Interp implements Visitor {
     Value v1 = evalExpr(e.e1);
     switch (e.op) {
     case Band:
-      throw new Todo(); // TODO (question 2)
+      this.value = new Vbool(v1.isTrue() && evalExpr(e.e2).isTrue());
+      break;
     case Bor:
-      throw new Todo(); // TODO (question 2)
+      this.value = new Vbool(v1.isTrue() || evalExpr(e.e2).isTrue());
     default:
       this.value = binop(e.op, v1, evalExpr(e.e2));
     }
@@ -343,7 +344,7 @@ class Interp implements Visitor {
     Value v = evalExpr(e.e);
     switch (e.op) {
     case Unot:
-      throw new Todo(); // TODO (question 2)
+      this.value = Vbool(!v.isTrue()); // TODO (question 2)
       break;
     case Uneg:
       this.value = Vint(-v.asInt());
@@ -400,7 +401,12 @@ class Interp implements Visitor {
 
   @Override
   public void visit(Sif s) {
-    throw new Todo(); // TODO (question 2)
+    if(evalExpr(s.e).isTrue()){
+      s.s1.accept(this);
+    }
+    else if(s.s2 != null){
+      s.s2.accept(this);
+    }
   }
 
   @Override
