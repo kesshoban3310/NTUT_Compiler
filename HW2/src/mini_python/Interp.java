@@ -263,56 +263,49 @@ class Interp implements Visitor {
   // binary operators
   static Value binop(Binop op, Value v1, Value v2) {
     switch (op) {
+    case Bsub:
+    case Bmul:
+    case Bdiv:
     case Bmod:
+      long a = v1.asInt();
+      long b = v2.asInt();
       switch (op){
-        long a = v1.asint();
-        long b = v2.asInt();
         case Bsub:
           return new Vint(a-b);
-          break;
         case Bmul:
           return new Vint(a*b);
-          break;
         case Bdiv:
           if(b == 0){
-            throw new error("Division by zero.");
+            throw new Error("Division by zero.");
           }
           return new Vint(a/b);
-          break;
         case Bmod:
           if(b == 0){
-            throw new error("Division by zero.");
+            throw new Error("Division by zero.");
           }
           return new Vint(a%b);
-          break;
       }
       break;
     case Badd:
       if (v1 instanceof Vint && v2 instanceof Vint)
-        return new Vint(a+b);
+        return new Vint(v1.asInt()+v2.asInt());
       if (v1 instanceof Vstring && v2 instanceof Vstring)
-        throw new Todo(); // TODO (question 3)
+        return new Vstring( ((Vstring) v1).s + ((Vstring) v2).s); // TODO (question 3)
       if (v1 instanceof Vlist && v2 instanceof Vlist)
         throw new Todo(); // TODO (question 5)
       break;
     case Beq:
-      return Vbool(v1.compareTo(v2) == 0);
-      break;
+      return new Vbool(v1.compareTo(v2) == 0);
     case Bneq:
-      return Vbool(v1.compareTo(v2) != 0);
-      break;
+      return new Vbool(v1.compareTo(v2) != 0);
     case Blt:
-      return Vbool(v1.compareTo(v2) < 0);
-      break;
+      return new Vbool(v1.compareTo(v2) < 0);
     case Ble:
-      return Vbool(v1.compareTo(v2) <= 0);
-      break;
+      return new Vbool(v1.compareTo(v2) <= 0);
     case Bgt:
-      return Vbool(v1.compareTo(v2) > 0);
-      break;
+      return new Vbool(v1.compareTo(v2) > 0);
     case Bge:
-      return Vbool(v1.compareTo(v2) >= 0);
-      break;
+      return new Vbool(v1.compareTo(v2) >= 0);
     default:
     }
     throw new Error("unsupported operand types");
@@ -334,6 +327,7 @@ class Interp implements Visitor {
       break;
     case Bor:
       this.value = new Vbool(v1.isTrue() || evalExpr(e.e2).isTrue());
+      break;
     default:
       this.value = binop(e.op, v1, evalExpr(e.e2));
     }
@@ -344,17 +338,17 @@ class Interp implements Visitor {
     Value v = evalExpr(e.e);
     switch (e.op) {
     case Unot:
-      this.value = Vbool(!v.isTrue()); // TODO (question 2)
+      this.value = new Vbool(!v.isTrue()); // TODO (question 2)
       break;
     case Uneg:
-      this.value = Vint(-v.asInt());
+      this.value = new Vint(-v.asInt());
       break;
     }
   }
 
   @Override
   public void visit(Eident id) {
-    throw new Todo(); // TODO (question 3)
+    this.value = this.vars.get(id.x.id); // TODO (question 3)
   }
 
   @Override
@@ -401,17 +395,17 @@ class Interp implements Visitor {
 
   @Override
   public void visit(Sif s) {
-    if(evalExpr(s.e).isTrue()){
+    if (evalExpr(s.e).isTrue()){
       s.s1.accept(this);
     }
-    else if(s.s2 != null){
+    else if (s.s2 != null){
       s.s2.accept(this);
     }
   }
 
   @Override
   public void visit(Sassign s) {
-    throw new Todo(); // TODO (question 3)
+    this.vars.put(s.x.id, evalExpr(s.e)); // TODO (question 3)
   }
 
   @Override
