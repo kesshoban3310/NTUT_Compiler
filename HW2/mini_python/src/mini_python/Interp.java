@@ -292,7 +292,7 @@ class Interp implements Visitor {
       if (v1 instanceof Vstring && v2 instanceof Vstring)
         return new Vstring( ((Vstring) v1).s + ((Vstring) v2).s); // TODO (question 3)
       if (v1 instanceof Vlist && v2 instanceof Vlist)
-        throw new Todo(); // TODO (question 5)
+        return new Vlist(((Vlist) v1).l,((Vlist) v2).l); // (question 5)
       break;
     case Beq:
       return new Vbool(v1.compareTo(v2) == 0);
@@ -355,24 +355,82 @@ class Interp implements Visitor {
   public void visit(Ecall e) {
     switch (e.f.id) {
     case "len":
-      throw new Todo(); // TODO (question 5)
+      // TODO (question 5)
+      if(e.l.size() != 1){
+        throw new Error("Too many arguments.");
+      }
+      Value ans = evalExpr(e.l.get(0));
+      if((ans instanceof Vlist) && (ans instanceof Vstring))
+        throw new Error("Wrong Argument");
+      if(ans instanceof Vlist){
+        this.value = new Vint( ((Vlist) ans).l.length) ;
+      }
+      else{
+        this.value = new Vint( ((Vstring) ans).s.length() );
+      }
+      break;
     case "list":
-      throw new Todo(); // TODO (question 5)
+      // TODO (question 5)
+      if(e.l.size() != 1){
+        throw new Error("Too many arguments.");
+      }
+      this.value = evalExpr(e.l.get(0)).asList();
+      break;
     case "range":
-      throw new Todo(); // TODO (question 5)
+      // TODO (question 5)
+      if(e.l.size() != 1){
+        throw new Error("Too many arguments.");
+      }
+      long n = evalExpr(e.l.get(0)).asInt();
+      Vlist rangeans = new Vlist((int) n);
+      for(int i=0;i<n;i++){
+        rangeans.l[i] = new Vint(i);
+      }
+      this.value = rangeans;
+      break;
     default:
-      throw new Todo(); // TODO (question 4)
+      // TODO (question 4)
+      Def f = functions.get(e.f.id);
+      if(f == null){
+        throw new Error("Can't find the function name: " + e.f.id);
+      }
+      if(f.l.size() != e.l.size()){
+        throw new Error("Wrong Argument!");
+      }
+      Interp p = new Interp();
+      Iterator<Ident> iter = f.l.iterator();
+      for(Expr i:e.l){
+        p.vars.put(iter.next().id, evalExpr(i));
+      }
+      try {
+        f.s.accept(p);
+        this.value = new Vnone();
+      } catch (Return r) {
+        this.value = r.v;
+      }
     }
   }
 
   @Override
   public void visit(Elist e) {
-    throw new Todo(); // TODO (question 5)
+    // TODO (question 5)
+    Vlist ans = new Vlist(e.l.size());
+    int i = 0;
+    for(Expr j:e.l){
+      ans.l[i++] = evalExpr(j);
+    }
+    this.value = ans;
   }
 
   @Override
   public void visit(Eget e) {
-    throw new Todo(); // TODO (question 5)
+    // TODO (question 5)
+    Vlist ans = evalExpr(e.e1).asList();
+    long i = evalExpr(e.e2).asInt();
+    if(i < 0 || i >= ans.l.length){
+      throw new Error("Wrong Index");
+    } 
+    this.value = ans.l[(int) i];
   }
 
   // interpreting statements
@@ -410,16 +468,27 @@ class Interp implements Visitor {
 
   @Override
   public void visit(Sreturn s) {
-    throw new Todo(); // TODO (question 4)
+    throw new Return(evalExpr(s.e)); // TODO (question 4)
   }
 
   @Override
   public void visit(Sfor s) {
-    throw new Todo(); // TODO (question 5)
+    // TODO (question 5)
+    Vlist ans = evalExpr(s.e).asList();
+    for(Value i:ans.l){
+      this.vars.put(s.x.id, i);
+      s.s.accept(this);
+    }
   }
 
   @Override
   public void visit(Sset s) {
-    throw new Todo(); // TODO (question 5)
+    // TODO (question 5)
+    Vlist ans = evalExpr(s.e1).asList();
+    long i = evalExpr(s.e2).asInt();
+    if (i < 0 || i >= ans.l.length) {
+      throw new Error("index out of bounds");
+    }
+    ans.l[(int) i] = evalExpr(s.e3);
   }
 }
